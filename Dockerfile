@@ -1,4 +1,4 @@
-FROM debian:9
+FROM debian:testing
 
 ENV DEBIAN_FRONTEND=noninteractive \
     DEBCONF_NONINTERACTIVE_SEEN=true \
@@ -20,14 +20,16 @@ RUN apt-get update && \
         flex \
         python3 \
         python3-pip \
-        wget && \
+        wget \
+        libxml2 \
+        libxslt-dev && \
     pip3 install pipenv && \
-    (cd /app/docs && pipenv sync) && \
+    (cd /app/docs && pipenv lock && pipenv sync) && \
     (cd /app && \
         git submodule init && \
         git submodule update && \
         autoreconf -i && \
-        ./configure --disable-valgrind --enable-all-static --prefix=/usr/local && \
+        ./configure --with-oniguruma=builtin --prefix=/usr/local && \
         make -j8 && \
         make check && \
         make install ) && \
